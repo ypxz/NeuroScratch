@@ -79,7 +79,7 @@ def export_weights(
     output_path = Path(path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open('w', encoding='utf-8') as handle:
-        json.dump(payload, handle, indent=2)
+        json.dump(payload, handle, separators=(',', ':'))
         handle.write('\n')
 
 
