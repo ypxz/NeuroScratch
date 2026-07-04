@@ -11,7 +11,7 @@ requires-python = ">=3.10"
 dependencies = ["numpy"]
 
 [project.optional-dependencies]
-reference = ["torch", "torchvision"]
+reference = ["torch", "torchvision", "matplotlib"]
 dev = ["pytest", "ruff", "mypy"]
 
 [tool.setuptools]
@@ -26,13 +26,23 @@ select = ["E", "F", "I", "B", "UP", "SIM"]
 ignore = ["B905"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 strict = true
 warn_unused_configs = true
 no_implicit_optional = true
 show_error_codes = true
 pretty = true
 mypy_path = "."
+
+[[tool.mypy.overrides]]
+module = ["torch.*", "matplotlib.*"]
+ignore_missing_imports = true
+
+# numpy>=2.5 stubs no longer require the explicit casts A wrote for older numpy;
+# scoped so A's model module stays untouched while strict checking passes.
+[[tool.mypy.overrides]]
+module = ["neuroscratch.model.activations"]
+disable_error_code = ["redundant-cast"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
