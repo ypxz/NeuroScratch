@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 import numpy as np
 import numpy.typing as npt
 
@@ -41,11 +43,11 @@ class Softmax:
         exp = np.exp(shifted)
         probs = exp / np.sum(exp, axis=1, keepdims=True)
         self._probs = probs
-        return probs
+        return cast(Array, probs)
 
     def backward(self, dout: Array) -> Array:
         """Apply `J_ij = s_i(δ_ij - s_j)` row by row, i.e. `ds = s * (dout - <dout,s>)`."""
         if self._probs is None:
             raise RuntimeError("forward must be called before backward")
         dot = np.sum(dout * self._probs, axis=1, keepdims=True)
-        return self._probs * (dout - dot)
+        return cast(Array, self._probs * (dout - dot))

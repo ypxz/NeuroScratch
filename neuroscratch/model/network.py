@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from typing import Protocol, runtime_checkable
+from typing import Protocol, cast, runtime_checkable
 
 import numpy as np
 import numpy.typing as npt
@@ -77,7 +77,7 @@ class Sequential:
 
     def predict(self, x: Array) -> Labels:
         """Return `argmax(logits)` per row, which matches `argmax(softmax(logits))`."""
-        return np.argmax(self.forward(x), axis=1).astype(np.int64, copy=False)
+        return cast(Labels, np.argmax(self.forward(x), axis=1).astype(np.int64, copy=False))
 
 
 def build_mnist_network(seed: int = 42) -> Sequential:
