@@ -1,4 +1,4 @@
-import { forward, loadWeights } from "./inference.js";
+import { OOD_ENERGY_THRESHOLD, energyScore, forward, loadWeights } from "./inference.js";
 
 const drawCanvas = document.getElementById("draw-canvas");
 const drawCtx = drawCanvas.getContext("2d", { willReadFrequently: true });
@@ -15,6 +15,8 @@ const perturbedMeta = document.getElementById("perturbed-meta");
 const probabilityList = document.getElementById("probability-list");
 const perturbedProbabilityList = document.getElementById("perturbed-probability-list");
 const weightsGrid = document.getElementById("weights-grid");
+const oodBanner = document.getElementById("ood-banner");
+const predictionPanel = document.querySelector(".prediction-panel");
 const noiseSlider = document.getElementById("noise-slider");
 const noiseValue = document.getElementById("noise-value");
 const noiseSeedInput = document.getElementById("noise-seed");
@@ -25,6 +27,7 @@ const PREVIEW_SIZE = 28;
 const DIGIT_BOX = 20;
 const BRUSH_RADIUS = 10;
 const DEBOUNCE_MS = 120;
+const EMPTY_INPUT_MEAN_THRESHOLD = 0.01;
 
 const state = {
   weights: null,
@@ -332,11 +335,40 @@ function updateProbabilityRows(rows, probabilities, prediction) {
 function setPredictionElements(valueNode, metaNode, prediction, probabilities) {
   if (!probabilities) {
     valueNode.textContent = "—";
-    metaNode.textContent = "Draw a digit to begin.";
+    metaNode.textContent = "Draw a digit to get a prediction.";
     return;
   }
   valueNode.textContent = String(prediction);
   metaNode.textContent = `Top class: ${prediction}, confidence ${(probabilities[prediction] * 100).toFixed(
+    1,
+  )}%`;
+}
+
+function setOodUiState({ isBlank, isOod, prediction, probabilities, energy }) {
+  if (predictionPanel) {
+    predictionPanel.classList.toggle("is-ood", isOod);
+  }
+  if (oodBanner) {
+    oodBanner.hidden = !isOod;
+  }
+
+  if (isBlank) {
+    if (oodBanner) {
+      oodBanner.hidden = true;
+    }
+    if (predictionPanel) {
+      predictionPanel.classList.remove("is-ood");
+    }
+    predictionMeta.textContent = "Draw a digit to get a prediction.";
+    return;
+  }
+
+  if (isOod) {
+    predictionMeta.textContent = `Energy ${energy.toFixed(2)}. Prediction may be unreliable.`;
+    return;
+  }
+
+  predictionMeta.textContent = `Top class: ${prediction}, confidence ${(probabilities[prediction] * 100).toFixed(
     1,
   )}%`;
 }
@@ -397,14 +429,25 @@ function updatePredictions() {
   }
 
   state.currentInput = processed.input;
+  const meanIntensity = processed.input.reduce((sum, value) => sum + value, 0) / processed.input.length;
   inputPreviewCtx.clearRect(0, 0, PREVIEW_SIZE, PREVIEW_SIZE);
   inputPreviewCtx.drawImage(offscreen.centered, 0, 0);
 
   const result = forward(state.weights, processed.input);
+  const energy = energyScore(result.logits);
+  const isBlank = meanIntensity < EMPTY_INPUT_MEAN_THRESHOLD;
+  const isOod = !isBlank && energy > OOD_ENERGY_THRESHOLD;
   state.currentPrediction = result.prediction;
   state.currentProbabilities = result.probabilities;
 
   setPredictionElements(predictionValue, predictionMeta, result.prediction, result.probabilities);
+  setOodUiState({
+    isBlank,
+    isOod,
+    prediction: result.prediction,
+    probabilities: result.probabilities,
+    energy,
+  });
   updateProbabilityRows(originalProbabilityRows, result.probabilities, result.prediction);
 
   renderPerturbedState(processed.input);
