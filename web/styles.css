@@ -217,6 +217,23 @@ h1 {
   gap: 18px;
 }
 
+.ood-banner {
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  border: 1px solid rgba(251, 191, 36, 0.28);
+  border-radius: 14px;
+  background: rgba(120, 53, 15, 0.22);
+  color: #fde68a;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.prediction-panel.is-ood .prediction-grid:first-of-type .big-prediction,
+.prediction-panel.is-ood .prediction-grid:first-of-type .probabilities {
+  border-color: rgba(251, 191, 36, 0.28);
+  opacity: 0.88;
+}
+
 .perturbed-grid {
   margin-top: 20px;
   align-items: start;
