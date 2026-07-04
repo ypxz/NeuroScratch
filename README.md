@@ -1,12 +1,10 @@
 # NeuroScratch
 
-NeuroScratch is a from-scratch NumPy neural network for MNIST. I built it to prove I understand the mechanics behind matrix calculus, backpropagation, and gradient descent instead of leaning on a framework `.fit()` call. The strongest evidence that the math is right is that the from-scratch implementation matches a PyTorch reference closely, and the independent browser inference engine matches Python on fixed test inputs down to floating-point noise.
+NeuroScratch is a neural network for MNIST digit classification with the forward pass, backpropagation, and optimizer implemented from scratch in NumPy — no autograd or deep-learning framework in the training path. It ships a zero-backend browser demo: an independent JavaScript inference engine loads the exported weights and classifies digits drawn on a canvas, entirely client-side. A PyTorch model and a Python/JS parity test are included to validate the implementation.
 
 ## Demo
 
 Live demo: https://ypxz.github.io/NeuroScratch/
-
-![NeuroScratch demo](docs/assets/demo.webp)
 
 ![Digit 7 prediction](docs/assets/demo_predict_7.png)
 
@@ -81,13 +79,13 @@ cd web && python -m http.server 8000
 
 ## How it works
 
-Backpropagation is implemented by hand in NumPy. Dense layers cache their inputs, ReLU caches its activation mask, and the softmax plus cross-entropy path is written so the gradient can be checked against finite differences. The reported gradient-check maximum relative error is 3.23e-08, which is comfortably below the 1e-6 tolerance.
+Backpropagation is implemented by hand in NumPy. Dense layers cache their inputs, ReLU caches its activation mask, and the combined softmax/cross-entropy path has an analytical gradient that is verified against finite differences (maximum relative error 3.23e-08, tolerance 1e-6).
 
-The PyTorch reference exists as a cross-check, not as the primary implementation. It uses the same canonical architecture, split, seed, initialization, and optimizer settings, so the comparison is meaningful. The small 0.22 percentage-point delta between the from-scratch run and PyTorch reference is what I expected from two independent implementations of the same math.
+A PyTorch model with the same architecture, split, seed, initialization, and optimizer settings is used as a cross-check. The from-scratch and PyTorch test accuracies differ by 0.22 percentage points.
 
-The browser runtime is independent from the Python training stack. It loads exported JSON weights, runs its own forward pass in plain JavaScript, and uses the same `z = x @ W + b`, ReLU, and numerically stable softmax convention. On 200 fixed test samples, the JS argmax matched Python exactly, and the largest probability difference was 1.67e-15.
+The browser runtime is independent of the Python code. It loads the exported JSON weights and runs its own forward pass in plain JavaScript using the same `z = x @ W + b`, ReLU, and numerically stable softmax. On 200 fixed test samples the JS argmax matches Python exactly, with a maximum probability difference of 1.67e-15.
 
-## What I'd extend next
+## Possible extensions
 
 - Add convolutional layers and compare them against the current MLP baseline.
 - Add learning-rate schedules, weight decay, dropout, and batch normalization.
