@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NeuroScratch MNIST Demo</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">NeuroScratch</p>
+          <h1>MNIST handwritten digit demo</h1>
+          <p class="lead">
+            Draw a white digit on the black pad. The model runs entirely in the browser,
+            uses the exported weights, and updates live as you sketch.
+          </p>
+        </div>
+        <div class="status-card">
+          <div class="status-label">Model status</div>
+          <div id="model-status" class="status-value">Loading weights…</div>
+        </div>
+      </header>
+
+      <main class="grid">
+        <section class="panel canvas-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Draw pad</h2>
+              <p>White brush on black background, cropped and centered like MNIST.</p>
+            </div>
+            <div class="actions">
+              <button id="clear-btn" type="button">Clear</button>
+            </div>
+          </div>
+          <div class="pad-wrap">
+            <canvas id="draw-canvas" width="280" height="280" aria-label="Digit drawing canvas"></canvas>
+          </div>
+          <div class="preview-row">
+            <div class="preview-card">
+              <div class="preview-label">Preprocessed 28×28 input</div>
+              <canvas id="input-preview" width="28" height="28" class="preview-canvas"></canvas>
+            </div>
+            <div class="preview-card">
+              <div class="preview-label">Perturbed 28×28 input</div>
+              <canvas id="perturbed-preview" width="28" height="28" class="preview-canvas"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel prediction-panel">
+          <div class="panel-header">
+            <div>
+              <h2>Prediction</h2>
+              <p>Live output from the browser-only forward pass.</p>
+            </div>
+          </div>
+          <div class="prediction-grid">
+            <div class="big-prediction">
+              <div class="prediction-label">Original</div>
+              <div id="prediction-value" class="prediction-value">—</div>
+              <div id="prediction-meta" class="prediction-meta">Draw a digit to begin.</div>
+            </div>
+            <div class="probabilities">
+              <div class="section-title">Class probabilities</div>
+              <div id="probability-list" class="probability-list"></div>
+            </div>
+          </div>
+          <div class="prediction-grid perturbed-grid">
+            <div class="big-prediction subdued">
+              <div class="prediction-label">Perturbed</div>
+              <div id="perturbed-value" class="prediction-value">—</div>
+              <div id="perturbed-meta" class="prediction-meta">
+                Add noise to the current input to see how sensitive the model is.
+              </div>
+            </div>
+            <div class="noise-controls">
+              <div class="section-title">Adversarial-noise demo</div>
+              <p class="note">
+                Random noise can change the prediction even when the digit still looks recognizable.
+              </p>
+              <label class="slider-row" for="noise-slider">
+                <span>Noise</span>
+                <span id="noise-value">0.00</span>
+              </label>
+              <input id="noise-slider" type="range" min="0" max="0.5" step="0.01" value="0" />
+              <div class="seed-row">
+                <label for="noise-seed">Seed</label>
+                <input id="noise-seed" type="number" value="42" />
+                <button id="regenerate-noise-btn" type="button">Regenerate</button>
+              </div>
+            </div>
+          </div>
+          <div class="perturbed-probabilities">
+            <div class="section-title">Perturbed probabilities</div>
+            <div id="perturbed-probability-list" class="probability-list"></div>
+          </div>
+        </section>
+
+        <section class="panel weights-panel">
+          <div class="panel-header">
+            <div>
+              <h2>First-layer weights</h2>
+              <p>First 64 hidden units from the 784→256 layer, normalized per unit.</p>
+            </div>
+          </div>
+          <div id="weights-grid" class="weights-grid"></div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
