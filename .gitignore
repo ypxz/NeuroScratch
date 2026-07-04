@@ -36,7 +36,9 @@ data/
 # NOTE: the small exported browser weights (web/weights.json) ARE committed.
 training/runs/
 *.npz
-checkpoints/
+checkpoints/*
+# The final trained model IS committed so downstream sessions can load it.
+!checkpoints/mnist_from_scratch.npz
 
 # Node / web tooling
 node_modules/
